@@ -1,4 +1,4 @@
-from urllib.request import urlopen
+import requests
 from abc import ABC, abstractmethod
 import sys
 
@@ -24,7 +24,7 @@ class Messenger(ABC):
         if messenger_type == "telegram":
             return TelegramMessenger(info["token"], info["chat_id"], info["parse_mode"], info["header"])
         elif messenger_type == "slack":
-            return SlackMessenger(info["token"], info["user"], info["channel"])
+            return SlackMessenger(info['api_url'], info['header'])
         elif messenger_type == "stream":
             return StreamMessenger(sys.stdout)
         elif messenger_type == "null":
@@ -94,7 +94,7 @@ class TelegramMessenger(Messenger):
 
     def _send(self, message, chat_id=None, parse_mode=None):
         chat_id = chat_id if chat_id else self._chat_id
-        parse_mode = parse_mode if parse_mode else self._parse_mode
+        parse_mode = parse_mode or self._parse_mode
         total_message = self.header + message
         total_message = self._alt_message_by_parse_mode(total_message, parse_mode)
         self.bot.send_message(chat_id=chat_id, text=total_message, parse_mode=parse_mode)
@@ -109,14 +109,18 @@ class TelegramMessenger(Messenger):
 
 
 class SlackMessenger(Messenger):
-    TARGET_URL_FORMAT = "https://%s.slack.com/services/hooks/slackbot?token=%s&channel=%s"
 
-    def __init__(self, token, user, channel):
+    def __init__(self, api_url, header='', parse_mode=None):
         super().__init__()
-        self._target_url = self.TARGET_URL_FORMAT % (user, token, channel)
+        self.api_url = api_url
+        self.header = header
+        self.parse_mode = parse_mode
 
-    def send(self, message):
-        urlopen(self._target_url, data=message).read()
+    def send(self, message, parse_mode=None):
+        payload = {
+            'text': self.header + message
+        }
+        requests.post(self.api_url, json=payload)
 
 
 class SharedMessenger(object):
