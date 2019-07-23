@@ -2,7 +2,7 @@ from urllib.request import urlopen
 from abc import ABC, abstractmethod
 import sys
 
-from util.custom import CustomLogger
+from .custom import CustomLogger
 
 logger = CustomLogger.__call__().get_logger()
 

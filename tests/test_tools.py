@@ -1,6 +1,6 @@
 import pytest
 
-from util import tools
+from .. import tools
 
 
 @pytest.mark.parametrize(['url', 'keeps', 'expected'], [

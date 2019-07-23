@@ -1,6 +1,6 @@
 from unittest.mock import patch, Mock
 
-from util.messaging import SharedMessenger
+from ..messaging import SharedMessenger
 
 
 @patch('sys.stdout')

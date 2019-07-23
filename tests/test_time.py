@@ -2,7 +2,7 @@ from datetime import timedelta, datetime, time
 
 import pytest
 
-from util.time import IntervalLocker, TimeRangeLocker
+from ..time import IntervalLocker, TimeRangeLocker
 
 
 def test_locker_wait(watch):

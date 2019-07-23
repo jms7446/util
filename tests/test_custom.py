@@ -1,7 +1,7 @@
 import textwrap
 from io import StringIO
 
-from util.custom import MyConfigParser
+from ..custom import MyConfigParser
 
 
 def test_my_config_parser():
