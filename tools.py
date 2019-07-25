@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
 
 
@@ -36,3 +37,39 @@ def flat_text_with_sep(texts_list, sep1='\t', sep2='\n'):
     """
     norm_texts_list = [[norm_whitespace(text) for text in texts] for texts in texts_list]
     return sep2.join(sep1.join(texts) for texts in norm_texts_list)
+
+
+################################################################################
+# for db
+# reference : https://stackoverflow.com/questions/7499767/temporarily-disable-auto-now-auto-now-add
+################################################################################
+
+@contextmanager
+def turn_off_auto_now(model, field_name):
+    _switch_auto_now(model, field_name, False)
+    yield
+    _switch_auto_now(model, field_name, True)
+
+
+def _switch_auto_now(model, field_name, on):
+    def switch_auto_now(field):
+        field.auto_now = on
+    do_to_model(model, field_name, switch_auto_now)
+
+
+@contextmanager
+def turn_off_auto_now_add(model, field_name):
+    _switch_auto_now_add(model, field_name, False)
+    yield
+    _switch_auto_now_add(model, field_name, True)
+
+
+def _switch_auto_now_add(model, field_name, on):
+    def switch_auto_now_add(field):
+        field.auto_now_add = on
+    do_to_model(model, field_name, switch_auto_now_add)
+
+
+def do_to_model(model, field_name, func):
+    field = model._meta.get_field(field_name)
+    func(field)
