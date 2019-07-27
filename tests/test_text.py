@@ -1,6 +1,6 @@
 import pytest
 
-from ..text import Match, AhocorasickWrapper, search_highlight
+from ..text import Match, AhocorasickWrapper, search_highlight, strip_margin
 
 
 ################################################################################
@@ -59,3 +59,12 @@ def test_search_highlight(text, ptn_list, expected):
 ])
 def test_search_highlight_html(text, ptn_list, expected):
     assert search_highlight(text, ptn_list, mode='html') == expected
+
+
+def test_strip_margin():
+    s = '''
+    ab c
+    d e
+     x
+    '''
+    assert strip_margin(s) == 'ab c\nd e\n x'

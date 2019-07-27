@@ -1,5 +1,7 @@
+import re
 from typing import List
 from dataclasses import dataclass
+from inspect import cleandoc
 
 from ahocorasick import Automaton
 
@@ -78,3 +80,8 @@ def search_highlight(text, ptn_list, mode='md'):
         text = text.replace(mid_ptn, target)
 
     return text
+
+
+def strip_margin(text):
+    """Use inspect.cleandoc instead"""
+    return cleandoc(text)
