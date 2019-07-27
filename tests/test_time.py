@@ -40,6 +40,34 @@ def test_locker_wait(watch):
     assert t3_start == t3_end
 
 
+def test_interval_locker_reset_if_free(watch):
+    """리셋 시간이 되었는지를 외부에서 loop을 돌면서 체크할 때 사용하는 함수이다. 제대로 동작하는지 확인한다."""
+    lock_seconds = 5
+    locker = IntervalLocker(lock_seconds, watch.now())
+
+    # 처음에는 free 이므로 True 반환
+    assert locker.is_free_then_lock()
+
+    # 이제 5초가 흘러야 True를 반환한다.
+
+    # reset_if_free를 호출해도 내부적으로 sleep이 없으므로 시간이 흐르지 않는다
+    now = watch.now()
+    assert not locker.is_free_then_lock()
+    assert watch.now() == now
+
+    # 4초가 흘러도 잠겨있음
+    watch.sleep(4)
+    assert not locker.is_free_then_lock()
+
+    # 이제 5초가 흐르면 열린다
+    watch.sleep(1)
+    assert locker.is_free_then_lock()
+
+    # 다시 잠김
+    watch.sleep(1)
+    assert not locker.is_free_then_lock()
+
+
 @pytest.mark.parametrize(['range_str', 'in_hours', 'not_in_hours'], [
     ('3 ~ 6', [3, 4, 5], [1, 2, 6, 7]),
     ('3~6', [3, 4, 5], [1, 2, 6, 7]),

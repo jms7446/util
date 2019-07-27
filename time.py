@@ -50,6 +50,15 @@ class IntervalLocker(Locker):
             watch.sleep(self.check_sec)
         self.free_time = cur_time + datetime.timedelta(seconds=self.interval)
 
+    def is_free_then_lock(self):
+        """free time이 되었으면 free time을 재설정하고 True를 리턴, 아니면 그냥 False를 리턴"""
+        cur_time = watch.now()
+        if cur_time >= self.free_time:
+            self.free_time = cur_time + datetime.timedelta(seconds=self.interval)
+            return True
+        else:
+            return False
+
 
 class TimeRangeLocker(Locker):
     """wait()가 호출되면 start ~ end 사이의 시간이라면 대기한다"""
