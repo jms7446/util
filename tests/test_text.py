@@ -1,6 +1,6 @@
 import pytest
 
-from ..text import Monitor, DiffMonitor, Match, AhocorasickWrapper, MonitorResult
+from ..text import Match, AhocorasickWrapper, search_highlight
 
 
 ################################################################################
@@ -44,40 +44,18 @@ def test_ahocorasick_wrapper_no_substring_match():
     ]
 
 
-################################################################################
-# Monitor
-################################################################################
-
-def test_matcher_basic_match():
-    keywords = ['abc', '사랑']
-    # 앞 뒤 3글자로(공백포함) snippet 생성. 영문, 한글 동일한 사이즈로 취급됨
-    monitor = Monitor(keywords=keywords, snippet_window_size=3)
-
-    assert monitor.check('xyz 안녕하세요').results == []
-    assert monitor.check('가 나 다 abc de f').results == [
-        MonitorResult('abc', ' 다 abc de'),
-    ]
-    assert monitor.check('가 나 다 abc 라마 사랑 하늘 end').results == [
-        MonitorResult('abc', ' 다 abc 라마'),
-        MonitorResult('사랑', '라마 사랑 하늘'),
-    ]
-
-
-@pytest.mark.parametrize(['pre_input', 'cur_input', 'removed', 'added'], [
-    ('', 'xyz 안녕하세요', [], []),
-    ('', '가나다 abc de f', [], [MonitorResult('abc', '나다 abc de')]),   # 생김
-    ('가나다 abc de f', '', [MonitorResult('abc', '나다 abc de')], []),   # 없어짐
-    ('가나다 abc de f', '가나다 abc de f', [], []),   # 동일한 입력
-    # ('가나다 abc de f', '가나다abcde f', [], []),   # 공백만 다름 (구현안됨)
-    ('가나다 abc de f', '가나도 abc de f', [MonitorResult('abc', '나다 abc de')], [MonitorResult('abc', '나도 abc de')]),
+@pytest.mark.parametrize(['text', 'ptn_list', 'expected'], [
+    ('ab cde fg', ['cde'], 'ab *cde* fg'),
+    ('ab cde fg | ab cd fg', ['cd', 'cde'], 'ab *cde* fg | ab *cd* fg'),    # substring 관계 패턴, 긴 패턴 우선
+    # ('')
 ])
-def test_state_matcher_basic_match1(pre_input, cur_input, removed, added):
-    """StateMatcher는 이전 문자열을 참조해서 keyword 주변에 변화가 있지 않으면 무시하는지 확인"""
-    keywords = ['abc', '사랑']
-    # 앞 뒤로 공백 제외 2글자로 snippet (영문, 한글 동일)
-    monitor = DiffMonitor(keywords=keywords, snippet_window_size=3)
+def test_search_highlight(text, ptn_list, expected):
+    assert search_highlight(text, ptn_list, mode='md') == expected
 
-    monitor.check(pre_input)
-    report = monitor.check(cur_input)
-    assert report.removed_results == removed
-    assert report.added_results == added
+
+@pytest.mark.parametrize(['text', 'ptn_list', 'expected'], [
+    ('ab cde fg', ['cde'], 'ab <b>cde</b> fg'),
+    ('ab cde fg | ab cd fg', ['cd', 'cde'], 'ab <b>cde</b> fg | ab <b>cd</b> fg'),    # substring 관계 패턴, 긴 패턴 우선
+])
+def test_search_highlight_html(text, ptn_list, expected):
+    assert search_highlight(text, ptn_list, mode='html') == expected

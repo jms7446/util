@@ -1,5 +1,5 @@
 from typing import List
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from ahocorasick import Automaton
 
@@ -15,24 +15,6 @@ class Match:
         snippet_start = max(0, self.start - window_size)
         snippet_end = min(len(self.text), self.end + window_size)
         return self.text[snippet_start:snippet_end]
-
-
-@dataclass
-class MonitorResult:
-    keyword: str
-    snippet: str
-
-
-@dataclass
-class MonitorReport:
-    results: List[MonitorResult] = field(default_factory=list)
-
-
-@dataclass
-class DiffMonitorReport:
-    removed_results: List[MonitorResult] = field(default_factory=list)
-    added_results: List[MonitorResult] = field(default_factory=list)
-    pre_text: str = ''
 
 
 class AhocorasickWrapper:
@@ -72,48 +54,27 @@ class AhocorasickWrapper:
         return non_substring_matches
 
 
-class Monitor:
-    """keyword들이 주어진 text에 등장하는지 확인하고 매치된 정보를 제공한다"""
+def search_highlight(text, ptn_list, mode='md'):
+    if mode in ['md', 'markdown']:
+        target_format = '*{}*'
+    elif mode in ['html', 'htm']:
+        target_format = '<b>{}</b>'
+    else:
+        raise ValueError(f'Unknown mode: {mode}')
 
-    def __init__(self, keywords, snippet_window_size=2):
-        self.kwtree = AhocorasickWrapper(keywords, allow_substring_match=False)
-        self.snippet_window_size = snippet_window_size
+    # 긴 패턴의 replace를 우선한다.
+    ptn_list = sorted(ptn_list, key=lambda x: len(x), reverse=True)
 
-    def check(self, text: str) -> MonitorReport:
-        matches = self.kwtree.find_all(text)
-        results = [MonitorResult(keyword=match.keyword, snippet=match.make_snippet(self.snippet_window_size))
-                   for match in matches]
-        return MonitorReport(results=results)
+    # substring 관계에 있는 패턴을 보호하기 위해서 패턴을 찾는 동안에는 mid_ptn으로 변환했다가, 패턴을 다 찾은 후 일괄 변환한다
+    mid_ptn_map = {}
+    for i, ptn in enumerate(ptn_list):
+        mid_ptn = f'__|{i}|__'
+        target = target_format.format(ptn)
+        text = text.replace(ptn, mid_ptn)
+        mid_ptn_map[mid_ptn] = target
 
+    # 일괄 변경
+    for mid_ptn, target in mid_ptn_map.items():
+        text = text.replace(mid_ptn, target)
 
-class DiffMonitor:
-    """Monitor 비슷하지만, 이전에 주어진 text를 참조해서 매치된 text 주변에 변화가 있지 않으면 무시한다"""
-
-    def __init__(self, keywords, snippet_window_size=2):
-        self.kwtree = AhocorasickWrapper(keywords)
-        self.snippet_window_size = snippet_window_size
-        self.pre_text = ""
-
-    def check(self, text: str) -> DiffMonitorReport:
-        if text == self.pre_text:
-            monitor_report = DiffMonitorReport(pre_text=self.pre_text)
-        else:
-            monitor_report = self._diff_results(text)
-            self.pre_text = text
-        return monitor_report
-
-    def _diff_results(self, new_text):
-        pre_matches = self.kwtree.find_all(self.pre_text)
-        pre_results = [MonitorResult(match.keyword, match.make_snippet(self.snippet_window_size))
-                       for match in pre_matches]
-        pre_snippet_set = {result.snippet for result in pre_results}
-
-        new_matches = self.kwtree.find_all(new_text)
-        new_results = [MonitorResult(match.keyword, match.make_snippet(self.snippet_window_size))
-                       for match in new_matches]
-        new_snippet_set = {result.snippet for result in new_results}
-
-        removed_results = [result for result in pre_results if result.snippet not in new_snippet_set]
-        added_results = [result for result in new_results if result.snippet not in pre_snippet_set]
-
-        return DiffMonitorReport(removed_results, added_results, self.pre_text)
+    return text
