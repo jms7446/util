@@ -1,4 +1,3 @@
-import re
 from typing import List
 from dataclasses import dataclass
 from inspect import cleandoc
@@ -11,37 +10,47 @@ class Match:
     keyword: str
     start: int
     end: int
-    text: str
+    # text: str
 
-    def make_snippet(self, window_size=2):
-        snippet_start = max(0, self.start - window_size)
-        snippet_end = min(len(self.text), self.end + window_size)
-        return self.text[snippet_start:snippet_end]
+    # def make_snippet(self, window_size=2):
+    #     snippet_start = max(0, self.start - window_size)
+    #     snippet_end = min(len(self.text), self.end + window_size)
+    #     return self.text[snippet_start:snippet_end]
 
 
 class AhocorasickWrapper:
     def __init__(self, keywords: List[str], allow_substring_match=False):
-        self.kwtree = Automaton()
+        self.kwtree = self._make_kwtree(keywords)
         self.allow_substring_match = allow_substring_match
-        for keyword in keywords:
-            self.kwtree.add_word(keyword, keyword)
-        self.kwtree.make_automaton()
 
     def find_all(self, text: str) -> List[Match]:
-        ahocorasick_result = self.kwtree.iter(text)
-        start_end_result = self._alt_result_format(ahocorasick_result)
-        matches = [Match(kw, start, end, text) for kw, start, end in start_end_result]
-        if self.allow_substring_match:
-            return matches
+        if self.kwtree:
+            ahocorasick_result = self.kwtree.iter(text)
+            matches = self._alt_result_to_match(ahocorasick_result)
+            if self.allow_substring_match:
+                return matches
+            else:
+                return self._exclude_substring_match(matches)
         else:
-            return self._exclude_substring_match(matches)
+            return []
 
     @staticmethod
-    def _alt_result_format(ahocorasick_results):
+    def _make_kwtree(keywords):
+        if keywords:
+            kwtree = Automaton()
+            for keyword in keywords:
+                kwtree.add_word(keyword, keyword)
+            kwtree.make_automaton()
+        else:
+            kwtree = None
+        return kwtree
+
+    @staticmethod
+    def _alt_result_to_match(ahocorasick_results) -> List[Match]:
         """pyahocorasick 에서 나오는 end 값은 매칭된 마지막 index, python slicing 개념의 start, end로 바꾼다
         [(kw, end_index), ...] -> [(kw, start, end), ...]
         """
-        return [(kw, end_index + 1 - len(kw), end_index + 1) for end_index, kw in ahocorasick_results]
+        return [Match(kw, end_index + 1 - len(kw), end_index + 1) for end_index, kw in ahocorasick_results]
 
     @staticmethod
     def _exclude_substring_match(matches: List[Match]):
