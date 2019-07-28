@@ -3,16 +3,6 @@ import pytest
 from ..text import Match, AhocorasickWrapper, search_highlight, strip_margin
 
 
-# 어디로 이동할지 생각해 볼 것
-@pytest.mark.skip
-def test_match_make_snippet():
-    match = Match('abc', 3, 6, 'xy abc fgh')
-    assert match.make_snippet(window_size=1) == ' abc '
-    assert match.make_snippet(window_size=2) == 'y abc f'
-    assert match.make_snippet(window_size=3) == 'xy abc fg'
-    assert match.make_snippet(window_size=9) == 'xy abc fgh'
-
-
 def test_ahocorasick_wrapper_with_allow_substring_match():
     """ahocorasick 기본 동작 확인"""
     keywords = ['abcd', 'bc', 'bcd', 'abc', 'cde']

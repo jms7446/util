@@ -12,11 +12,6 @@ class Match:
     end: int
     # text: str
 
-    # def make_snippet(self, window_size=2):
-    #     snippet_start = max(0, self.start - window_size)
-    #     snippet_end = min(len(self.text), self.end + window_size)
-    #     return self.text[snippet_start:snippet_end]
-
 
 class AhocorasickWrapper:
     def __init__(self, keywords: List[str], allow_substring_match=False):
