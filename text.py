@@ -60,7 +60,7 @@ class AhocorasickWrapper:
         return non_substring_matches
 
 
-def search_highlight(text, ptn_list, mode='md'):
+def search_highlight(text, ptn_list, mode='md') -> str:
     if mode in ['md', 'markdown']:
         target_format = '*{}*'
     elif mode in ['html', 'htm']:
