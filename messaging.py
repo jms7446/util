@@ -96,7 +96,6 @@ class TelegramMessenger(Messenger):
         chat_id = chat_id if chat_id else self._chat_id
         parse_mode = parse_mode or self._parse_mode
         total_message = self.header + message
-        total_message = self._alt_message_by_parse_mode(total_message, parse_mode)
         self.bot.send_message(chat_id=chat_id, text=total_message, parse_mode=parse_mode)
 
     def send(self, message, parse_mode=None):
