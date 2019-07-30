@@ -30,40 +30,6 @@ class Messenger(ABC):
         elif messenger_type == "null":
             return NullMessenger()
 
-    @staticmethod
-    def _alt_message_by_parse_mode(message, parse_mode):
-        def remove_html_tag_pattern(s):
-            return (s
-                    .replace("<", "(")
-                    .replace(">", ")"))
-
-        def remove_markdown_pattern(s):
-            return (s
-                    .replace("*", "%")
-                    .replace("*", "%"))
-
-        def replace_html_tag_pattern(s):
-            return (s
-                    .replace(NEW_LINE, "\n")
-                    .replace(BOLD_BEGIN, "<b>")
-                    .replace(BOLD_END, "</b>"))
-
-        def replace_markdown_pattern(s):
-            return (s
-                    .replace(NEW_LINE, "\n")
-                    .replace(BOLD_BEGIN, "*")
-                    .replace(BOLD_END, "*"))
-
-        if parse_mode.lower() == "html":
-            message = remove_html_tag_pattern(message)
-            message = replace_html_tag_pattern(message)
-        elif parse_mode.lower() == "markdown":
-            message = remove_markdown_pattern(message)
-            message = replace_markdown_pattern(message)
-        else:
-            raise Exception("Unknown parse mode : {}".format(parse_mode))
-        return message
-
 
 class StreamMessenger(Messenger):
     def __init__(self, stream):
