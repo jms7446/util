@@ -40,6 +40,19 @@ class CustomLogger(metaclass=SingletonType):
         return self._logger
 
 
+class MessengerLogHandler(logging.Handler):
+
+    def __init__(self, messenger, level, formatter=None):
+        super().__init__()
+        self.messenger = messenger
+        self.level = level
+        self.formatter = formatter or self.formatter
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.messenger.send(msg)
+
+
 class MyConfigParser(ConfigParser):
     """ConfigParser 에 to_dict 를 추가한 클래스
 

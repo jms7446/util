@@ -1,15 +1,7 @@
+import logging
 import requests
 from abc import ABC, abstractmethod
 import sys
-
-from .custom import CustomLogger
-
-logger = CustomLogger.__call__().get_logger()
-
-# for messaging
-BOLD_BEGIN = "_(b)_"
-BOLD_END = "_(/b)_"
-NEW_LINE = "_(n)_"
 
 
 class Messenger(ABC):
@@ -69,7 +61,7 @@ class TelegramMessenger(Messenger):
             self._send(message, parse_mode)
         except Exception:
             self._send("TelegramMessenger: message_send_fail")
-            logger.exception(f"TelegramMessenger: message_send_fail, ({message})")
+            logging.exception(f"TelegramMessenger: message_send_fail, ({message})")
             raise
 
 
