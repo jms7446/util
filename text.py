@@ -10,7 +10,6 @@ class Match:
     keyword: str
     start: int
     end: int
-    # text: str
 
 
 class AhocorasickWrapper:
