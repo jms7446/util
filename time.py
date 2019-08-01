@@ -1,6 +1,8 @@
 import time
 import datetime
 from abc import ABC, abstractmethod
+import contextlib
+import logging
 
 
 class _Watch:
@@ -84,3 +86,41 @@ class TimeRangeLocker(Locker):
             return self.start_time <= tm < self.end_time
         else:
             return self.start_time <= tm or tm < self.end_time
+
+
+class wait_when_error:
+    """Exception이 발생하면 대기한다. Exception이 발생할 때마다 대기시간이 지수적으로 늘어나고 발생하지 않으면 지수적으로 감소한다"""
+
+    def __init__(self, default_result, min_wait_time=60.0, max_wait_time=3600.0,
+                 up_ratio=2.0, down_ratio=0.5, reset_when_no_err=False, logging_exception=True):
+        self.default_result = default_result
+        self.min_wait_time = min_wait_time
+        self.max_wait_time = max_wait_time
+        self.up_ratio = up_ratio
+        self.down_ratio = down_ratio
+        self.reset_when_no_error = reset_when_no_err
+        self.logging_exception = logging_exception
+        self.wait_time = min_wait_time
+        if up_ratio <= 1.0:
+            raise ValueError(f'up_ratio must bigger than 1.0: {up_ratio}')
+        if down_ratio >= 1.0:
+            raise ValueError(f'down_ratio must smaller than 1.0: {down_ratio}')
+
+    def __call__(self, func):
+        @contextlib.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                result = func(*args, **kwargs)
+            except Exception:
+                if self.logging_exception:
+                    logging.exception(f'Exception occurred and wait {self.wait_time}sec')
+                watch.sleep(self.wait_time)
+                self.wait_time = min(self.max_wait_time, self.wait_time * self.up_ratio)
+                result = self.default_result
+            else:
+                if self.reset_when_no_error:
+                    self.wait_time = self.min_wait_time
+                else:
+                    self.wait_time = max(self.min_wait_time, self.wait_time * self.down_ratio)
+            return result
+        return wrapper

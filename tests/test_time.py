@@ -1,8 +1,9 @@
 from datetime import timedelta, datetime, time
+from unittest.mock import Mock
 
 import pytest
 
-from ..time import IntervalLocker, TimeRangeLocker
+from ..time import IntervalLocker, TimeRangeLocker, wait_when_error
 
 
 def test_locker_wait(watch):
@@ -103,3 +104,60 @@ def test_time_range_wait_until_no_waiting(watch):
     time_range.wait()
     t2 = watch.now()
     assert t1 == t2
+
+
+################################################################################
+# wait_when_error
+################################################################################
+
+def test_wait_when_error_return_right_value(watch):
+    """default_result 값을 정상적으로 처리하고 있는가"""
+    func = Mock()
+    wrapped = wait_when_error(default_result=0)(func)
+
+    func.side_effect = [1]
+    assert wrapped() == 1
+
+    func.side_effect = [Exception]
+    assert wrapped() == 0
+
+
+@pytest.mark.parametrize(['init_wait_time', 'results', 'is_reset', 'expected_wait_times'], [
+    (6, [1, 1], False, [0, 0]),
+    (4, [Exception, Exception], False, [4, 8]),
+    (6, [Exception, Exception], False, [6, 10]),
+    (6, [1, Exception], False, [0, 3]),
+    (3, [1, Exception], False, [0, 2]),
+    (8, [1, Exception], True, [0, 2]),
+])
+def test_wait_when_error_wait_time_correctly(init_wait_time, results, expected_wait_times, is_reset, watch):
+    """error가 생겼을 때 대기하는 시간의 증감이 제대로 이루어지는지 확인"""
+    wrapper = wait_when_error(default_result=0, up_ratio=2, down_ratio=0.5, min_wait_time=2, max_wait_time=10,
+                              reset_when_no_err=is_reset)
+    wrapper.wait_time = init_wait_time
+    wrapped = wrapper(Mock(side_effect=results))
+
+    t = watch.now()
+    wrapped()
+    assert (watch.now() - t).seconds == expected_wait_times[0]
+
+    t = watch.now()
+    wrapped()
+    assert (watch.now() - t).seconds == expected_wait_times[1]
+
+
+def test_wait_when_error_as_decorator(watch):
+    """decorator로 동작하는지 간단한 정도로만 확인"""
+    @wait_when_error(default_result=0, min_wait_time=2)
+    def func(a, b):
+        if a == 0:
+            raise Exception
+        return a + b
+
+    t = watch.now()
+    assert func(1, 2) == 3
+    assert (watch.now() - t).seconds == 0
+
+    t = watch.now()
+    assert func(0, 2) == 0
+    assert (watch.now() - t).seconds == 2
