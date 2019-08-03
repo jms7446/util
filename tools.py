@@ -1,4 +1,5 @@
 import os
+import pickle
 from contextlib import contextmanager
 from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
 
@@ -6,7 +7,8 @@ from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
 def make_parent_dir(path):
     """make dir of path if not exist"""
     dir_name = os.path.dirname(path)
-    os.makedirs(dir_name, exist_ok=True)
+    if dir_name:
+        os.makedirs(dir_name, exist_ok=True)
 
 
 def norm_url_query_string_with_keep(url, keep_keys):
@@ -73,3 +75,15 @@ def _switch_auto_now_add(model, field_name, on):
 def do_to_model(model, field_name, func):
     field = model._meta.get_field(field_name)
     func(field)
+
+
+def pickle_dump(obj, file_path):
+    """파일 이름을 받아서 obj를 저장한다. 관련 귀찮은 작업 수행"""
+    make_parent_dir(file_path)
+    with open(file_path, 'wb') as f:
+        pickle.dump(obj, f)
+
+
+def pickle_load(file_path):
+    with open(file_path, 'rb') as f:
+        return pickle.load(f)

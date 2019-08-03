@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from .. import tools
@@ -38,3 +39,12 @@ def test_flat_text_with_sep(texts_list, expected):
 def test_make_abs_url(url, expected):
     base_url = 'http://d.e.com/r/h'
     assert tools.make_abs_url(base_url, url) == expected
+
+
+def test_pickle_dump_load(tmpdir):
+    obj = {'a': 1, 'b': 2}
+    file_path = os.path.join(tmpdir, 'tmp.pkl')
+    tools.pickle_dump(obj, file_path)
+    loaded_obj = tools.pickle_load(file_path)
+
+    assert loaded_obj == obj
