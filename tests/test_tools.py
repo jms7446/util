@@ -48,3 +48,11 @@ def test_pickle_dump_load(tmpdir):
     loaded_obj = tools.pickle_load(file_path)
 
     assert loaded_obj == obj
+
+
+def test_text_dum_load(tmpdir):
+    text = 'hi, 안녕하세요. \n ! \t'
+    file_path = os.path.join(tmpdir, 'tmp.pkl')
+
+    tools.text_write(text, file_path)
+    assert tools.text_read(file_path) == text

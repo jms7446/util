@@ -77,13 +77,27 @@ def do_to_model(model, field_name, func):
     func(field)
 
 
+################################################################################
+# 파일에 쓰거나 읽기, 디렉토리를 만들고 파일을 열고 귀찮은 작업 묶음
+################################################################################
+
 def pickle_dump(obj, file_path):
-    """파일 이름을 받아서 obj를 저장한다. 관련 귀찮은 작업 수행"""
     make_parent_dir(file_path)
     with open(file_path, 'wb') as f:
-        pickle.dump(obj, f)
+        pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def pickle_load(file_path):
     with open(file_path, 'rb') as f:
         return pickle.load(f)
+
+
+def text_write(text, file_path):
+    make_parent_dir(file_path)
+    with open(file_path, 'w') as f:
+        f.write(text)
+
+
+def text_read(file_path):
+    with open(file_path, 'r') as f:
+        return f.read()
