@@ -1,6 +1,7 @@
 from typing import List
 from dataclasses import dataclass
 from inspect import cleandoc
+import re
 
 from ahocorasick import Automaton
 
@@ -88,3 +89,12 @@ def search_highlight(text, ptn_list, mode='md') -> str:
 def strip_margin(text):
     """Use inspect.cleandoc instead"""
     return cleandoc(text)
+
+
+def multi_replace(string, substitutions):
+    """dict으로 들어온 매핑을 사용해 string을 replace한다
+    ref : https://gist.github.com/carlsmith/b2e6ba538ca6f58689b4c18f46fef11c?fbclid=IwAR3Aw1StDSDbQIHY9aZHca0A37e-b9v1RCsE9jofRmBKFrT9w-ZsWRWjsBI
+    """
+    substrings = sorted(substitutions, key=len, reverse=True)
+    regex = re.compile('|'.join(map(re.escape, substrings)))
+    return regex.sub(lambda match: substitutions[match.group(0)], string)

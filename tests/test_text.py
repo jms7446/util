@@ -1,6 +1,6 @@
 import pytest
 
-from ..text import Match, AhocorasickWrapper, search_highlight, strip_margin
+from ..text import Match, AhocorasickWrapper, search_highlight, strip_margin, multi_replace
 
 
 def test_ahocorasick_wrapper_with_allow_substring_match():
@@ -58,3 +58,9 @@ def test_strip_margin():
      x
     '''
     assert strip_margin(s) == 'ab c\nd e\n x'
+
+
+def test_multi_replace():
+    string = "spam foo bar foo bar spam"
+    substitutions = {"foo": "FOO", "bar": "BAR"}
+    assert multi_replace(string, substitutions) == 'spam FOO BAR FOO BAR spam'
