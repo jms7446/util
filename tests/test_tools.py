@@ -4,6 +4,20 @@ import pytest
 from .. import tools
 
 
+@pytest.mark.parametrize(['file_path', 'suffix', 'expected'], [
+    ('/dir/aa.txt', 'suffix', '/dir/aa_suffix.txt'),
+    ('dir/aa.txt', 'suffix', 'dir/aa_suffix.txt'),
+    ('aa.txt', 'suffix', 'aa_suffix.txt'),
+    ('/dir/aa', 'suffix', '/dir/aa_suffix'),
+    ('/dir/', 'suffix', '/dir/_suffix'),  # 애매하다
+    ('.', 'suffix', '_suffix.'),        # 애매하다
+    ('/dir/.txt', 'suffix', '/dir/_suffix.txt'),  # 흔한 케이스는 아니다
+    ('/dir/aa.', 'suffix', '/dir/aa_suffix.'),  # 흔한 케이스는 아니다
+])
+def test_add_file_name_suffix(file_path, suffix, expected):
+    assert tools.add_file_name_suffix(file_path, suffix) == expected
+
+
 @pytest.mark.parametrize(['url', 'keeps', 'expected'], [
     ('http://a.b.com/path/file.html?z=1&y=2&x=3', ['x', 'z'], 'http://a.b.com/path/file.html?x=3&z=1'),
     ('/zboard/view.php?id=freeboard&page=1&divpage=1&no=65', ['no', 'id'], '/zboard/view.php?no=65&id=freeboard'),

@@ -4,6 +4,16 @@ from contextlib import contextmanager
 from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
 
 
+def add_file_name_suffix(file_path, suffix):
+    """/dir/name.txt -> /dir/name_suffix.txt로 변환"""
+    tokens = file_path.rsplit('.', 1)
+    name = tokens[0] + '_' + suffix
+    if len(tokens) == 2:
+        return f'{name}.{tokens[1]}'
+    else:
+        return name
+
+
 def make_parent_dir(path):
     """make dir of path if not exist"""
     dir_name = os.path.dirname(path)
@@ -76,6 +86,7 @@ def do_to_model(model, field_name, func):
     field = model._meta.get_field(field_name)
     func(field)
 
+################################################################################
 
 ################################################################################
 # 파일에 쓰거나 읽기, 디렉토리를 만들고 파일을 열고 귀찮은 작업 묶음
@@ -101,3 +112,5 @@ def text_write(text, file_path):
 def text_read(file_path):
     with open(file_path, 'r') as f:
         return f.read()
+
+################################################################################
