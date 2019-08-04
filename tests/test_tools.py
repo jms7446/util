@@ -70,3 +70,15 @@ def test_text_dum_load(tmpdir):
 
     tools.text_write(text, file_path)
     assert tools.text_read(file_path) == text
+
+
+@pytest.mark.parametrize(['dic1', 'dic2', 'expected'], [
+    ({'a': 1, 'b': 2}, {'a': 3, 'b': 4}, True),
+    ({'a': 1, 'b': 2}, {2: 2}, False),
+    ({'a': 1, 'b': 2}, {'a': 3, 'b': 'text'}, False),
+    ({'a': 1, 'b': 2}, {'a': 3, 'other_key': 4}, False),
+    ({'a': 1, 'nested': {'n1': 'x', 'n2': 1}}, {'a': 3, 'nested': {'n1': 'y', 'n2': 2}}, True),
+    ({'a': 1, 'nested': {'n1': 'x', 'n2': 1}}, {'a': 3, 'nested': {'n1': 'y', 'n2': False}}, False),
+])
+def test_is_equal_structured_dict(dic1, dic2, expected):
+    assert tools.is_equal_structured_dict(dic1, dic2) == expected

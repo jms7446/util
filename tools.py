@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 from contextlib import contextmanager
@@ -92,6 +93,7 @@ def do_to_model(model, field_name, func):
 # 파일에 쓰거나 읽기, 디렉토리를 만들고 파일을 열고 귀찮은 작업 묶음
 ################################################################################
 
+
 def pickle_dump(obj, file_path):
     make_parent_dir(file_path)
     with open(file_path, 'wb') as f:
@@ -114,3 +116,24 @@ def text_read(file_path):
         return f.read()
 
 ################################################################################
+
+
+def is_equal_structured_dict(dic1, dic2, verbose=False):
+    """간단하게 dict의 키 구조와 value의 타입이 같은지 확인한다
+    권장하는 방법은 아닌 것 같지만, 민감한 체킹 부분이 등장하면 그 때 발전시키기로 한다
+    """
+    if dic1.keys() != dic2.keys():
+        if verbose:
+            logging.warning(f'{dic1.keys()} differ {dic2.keys()}')
+        return False
+    for key in dic1.keys():
+        value1 = dic1[key]
+        value2 = dic2[key]
+        if type(value1) != type(value2):
+            if verbose:
+                logging.warning(f'key: {key}, type({value1}) differ type({value2})')
+            return False
+        if isinstance(value1, dict):
+            if not is_equal_structured_dict(value1, value2, verbose=verbose):
+                return False
+    return True
