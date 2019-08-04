@@ -32,8 +32,8 @@ def norm_url_query_string_with_keep(url, keep_keys):
     return urlunsplit(url_tuple)
 
 
-def make_abs_url(base_url, url):
-    final_url = urljoin(base_url, url)
+def make_abs_url(base_url, url=None):
+    final_url = urljoin(base_url, url) if url else base_url
     split = urlsplit(final_url)._replace(scheme='', netloc='')
     return urlunsplit(split)
 
