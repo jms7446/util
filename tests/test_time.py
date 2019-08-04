@@ -10,7 +10,7 @@ def test_locker_wait(watch):
     """IntervalLocker 가 interval 동안 wait 한 후의 시간이 interval 이 지난 후인지 확인한다."""
     lock_seconds = 5
     check_sec = 0.1
-    locker = IntervalLocker(lock_seconds, watch.now(), check_sec=check_sec)
+    locker = IntervalLocker(lock_seconds, check_sec=check_sec)
 
     # 최초 wait() 는 대기하지 않는다.
     t0_start = watch.now()
@@ -44,7 +44,7 @@ def test_locker_wait(watch):
 def test_interval_locker_reset_if_free(watch):
     """리셋 시간이 되었는지를 외부에서 loop을 돌면서 체크할 때 사용하는 함수이다. 제대로 동작하는지 확인한다."""
     lock_seconds = 5
-    locker = IntervalLocker(lock_seconds, watch.now())
+    locker = IntervalLocker(lock_seconds)
 
     # 처음에는 free 이므로 True 반환
     assert locker.is_free_then_lock()
@@ -67,6 +67,27 @@ def test_interval_locker_reset_if_free(watch):
     # 다시 잠김
     watch.sleep(1)
     assert not locker.is_free_then_lock()
+
+
+def test_interval_lock_init_lock_false(watch):
+    """init_lock=False(기본값) 하면 시작했을 때 열려있다"""
+    locker = IntervalLocker(5)
+    assert locker.is_free_then_lock()
+
+    watch.sleep(1)
+    assert not locker.is_free_then_lock()
+
+
+def test_interval_lock_init_lock_true(watch):
+    """init_lock=True로 하면 시작했을 때 잠겨있다"""
+    locker = IntervalLocker(5, init_lock=True)
+    assert not locker.is_free_then_lock()
+
+    watch.sleep(3)
+    assert not locker.is_free_then_lock()
+
+    watch.sleep(2)
+    assert locker.is_free_then_lock()
 
 
 @pytest.mark.parametrize(['range_str', 'in_hours', 'not_in_hours'], [

@@ -39,10 +39,12 @@ class Locker(ABC):
 class IntervalLocker(Locker):
     """wait()가 호출되면 이전 wait()가 return된 시간으로 부터 interval초 이후가 될 때까지 대기한다"""
 
-    def __init__(self, interval, free_time=None, check_sec=1):
+    def __init__(self, interval, init_lock=False, check_sec=1):
         super().__init__(check_sec)
         self.interval = interval
-        self.free_time = free_time or watch.now()
+        self.free_time = watch.now()
+        if init_lock:
+            self.free_time += datetime.timedelta(seconds=interval)
 
     def wait(self):
         while True:
