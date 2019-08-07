@@ -52,6 +52,10 @@ def flat_text_with_sep(texts_list, sep1='\t', sep2='\n'):
     return sep2.join(sep1.join(texts) for texts in norm_texts_list)
 
 
+def do_nothing(*args, **kwargs):
+    """호출되어도 아무것도 하지 않는 함수"""
+
+
 ################################################################################
 # for db
 # reference : https://stackoverflow.com/questions/7499767/temporarily-disable-auto-now-auto-now-add
