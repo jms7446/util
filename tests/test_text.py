@@ -1,6 +1,6 @@
 import pytest
 
-from ..text import Match, AhocorasickWrapper, search_highlight, strip_margin, multi_replace
+from ..text import Match, AhocorasickWrapper, search_highlight, strip_margin, multi_replace, remove_4byte_unicode
 
 
 def test_ahocorasick_wrapper_with_allow_substring_match():
@@ -64,3 +64,12 @@ def test_multi_replace():
     string = "spam foo bar foo bar spam"
     substitutions = {"foo": "FOO", "bar": "BAR"}
     assert multi_replace(string, substitutions) == 'spam FOO BAR FOO BAR spam'
+
+
+@pytest.mark.parametrize(['in_text', 'expected'], [
+    ('가나다💕라마바사', '가나다라마바사'),
+    ('abcdefghi', 'abcdefghi'),
+])
+def test_remove_4byte_unicode(in_text, expected):
+    assert remove_4byte_unicode(in_text) == expected
+

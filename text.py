@@ -98,3 +98,16 @@ def multi_replace(string, substitutions):
     substrings = sorted(substitutions, key=len, reverse=True)
     regex = re.compile('|'.join(map(re.escape, substrings)))
     return regex.sub(lambda match: substitutions[match.group(0)], string)
+
+
+try:
+    high_points = re.compile('[\U00010000-\U0010ffff]')
+except re.error:
+    # UCS-2 build
+    high_points = re.compile('[\uD800-\uDBFF][\uDC00-\uDFFF]')
+
+
+def remove_4byte_unicode(text):
+    """4byte unicode 제거 """
+    return high_points.sub('', text)
+
