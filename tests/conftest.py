@@ -1,5 +1,7 @@
 from unittest.mock import patch
 from datetime import datetime, timedelta
+import tempfile
+import shutil
 
 import pytest
 
@@ -20,3 +22,10 @@ def watch():
         watch.sleep.side_effect = sleep_effect
 
         yield watch
+
+
+@pytest.fixture
+def temp_dir():
+    dir_path = tempfile.mkdtemp()
+    yield dir_path
+    shutil.rmtree(dir_path)

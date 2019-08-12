@@ -1,5 +1,6 @@
 import logging
 import os
+from os.path import join as pjoin
 import pickle
 from contextlib import contextmanager
 from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
@@ -15,11 +16,38 @@ def add_file_name_suffix(file_path, suffix):
         return name
 
 
+def get_file_name(file_path):
+    return file_path.split('/')[-1]
+
+
 def make_parent_dir(path):
     """make dir of path if not exist"""
     dir_name = os.path.dirname(path)
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
+
+
+def move_file(src_path: str, dst_path: str, overwrite=True):
+    if os.path.exists(dst_path):
+        if os.path.isdir(dst_path):
+            raise ValueError(f'dst_path must be a file_path, directory found: {dst_path}')
+        elif os.path.isfile(dst_path):
+            if not overwrite:
+                raise ValueError(f'dst_path already exists and overwrite is False: {dst_path}')
+        else:
+            raise Exception(f'Unexpected dst_path type: {dst_path}')
+    make_parent_dir(dst_path)
+    os.rename(src_path, dst_path)
+
+
+def move_file_to_dir(src_path: str, dst_dir: str, overwrite=True):
+    if os.path.isfile(dst_dir):
+        raise ValueError(f'dst_dir must be a directory, file found: {dst_dir}')
+    os.makedirs(dst_dir, exist_ok=True)
+
+    file_name = get_file_name(src_path)
+    dst_path = pjoin(dst_dir, file_name)
+    move_file(src_path, dst_path, overwrite=overwrite)
 
 
 def norm_url_query_string_with_keep(url, keep_keys):

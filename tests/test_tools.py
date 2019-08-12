@@ -1,4 +1,6 @@
 import os
+from os.path import join as pjoin
+from pathlib import Path
 import pytest
 
 from .. import tools
@@ -64,7 +66,58 @@ def test_pickle_dump_load(tmpdir):
     assert loaded_obj == obj
 
 
-def test_text_dum_load(tmpdir):
+@pytest.fixture
+def move_file_temp_dir(temp_dir):
+    os.chdir(temp_dir)
+    os.makedirs('a')
+    os.makedirs('b/b_sub')
+    Path('a/x.txt').touch()
+    Path('b/x.txt').touch()
+    yield temp_dir
+
+
+@pytest.mark.parametrize(['src_path', 'dst_path', 'overwrite'], [
+    ('a/x.txt', 'b/y.txt', False),
+    ('a/x.txt', 'b/a.txt', True),
+    ('a/x.txt', 'c/d/y.txt', False),
+])
+def test_move_file_success(src_path, dst_path, overwrite, move_file_temp_dir):
+    tools.move_file(src_path, dst_path, overwrite=overwrite)
+    assert os.path.isfile(dst_path)
+
+
+@pytest.mark.parametrize(['src_path', 'dst_path', 'overwrite', 'exception'], [
+    ('a/x.txt', 'b/x.txt', False, ValueError),
+    ('a/x.txt', 'b/b_sub', True, ValueError),
+])
+def test_move_file_fail(src_path, dst_path, overwrite, exception, move_file_temp_dir):
+    with pytest.raises(exception):
+        tools.move_file(src_path, dst_path, overwrite=overwrite)
+    assert os.path.isfile(src_path)
+
+
+@pytest.mark.parametrize(['src_path', 'dst_dir', 'overwrite'], [
+    ('a/x.txt', 'b/b_sub', False),
+    ('a/x.txt', 'b', True),
+    ('a/x.txt', 'c/d', False),
+])
+def test_move_file_to_dir_success(src_path, dst_dir, overwrite, move_file_temp_dir):
+    tools.move_file_to_dir(src_path, dst_dir, overwrite=overwrite)
+    dst_path = pjoin(dst_dir, src_path.split('/')[-1])
+    assert os.path.isfile(dst_path)
+
+
+@pytest.mark.parametrize(['src_path', 'dst_dir', 'overwrite', 'exception'], [
+    ('a/x.txt', 'b', False, ValueError),
+    ('a/x.txt', 'b/x.txt', True, ValueError),
+])
+def test_move_file_to_dir_fail(src_path, dst_dir, overwrite, exception, move_file_temp_dir):
+    with pytest.raises(exception):
+        tools.move_file_to_dir(src_path, dst_dir, overwrite=overwrite)
+    assert os.path.isfile(src_path)
+
+
+def test_text_dump_load(tmpdir):
     text = 'hi, 안녕하세요. \n ! \t'
     file_path = os.path.join(tmpdir, 'tmp.pkl')
 
