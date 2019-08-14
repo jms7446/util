@@ -3,6 +3,31 @@ import logging
 from configparser import ConfigParser
 
 
+class SingletonInstance:
+    """Sington type from https://wikidocs.net/3693
+
+    note: 여기 예제중에서 call 속도도 가장 빠르고 여러가지 상속이나 기타 상황에서 가장 문제가 없는 방식이다.
+    사용 방식은 C/C++에서 자주사용하는 방식과 비슷하게 직접 instance 메소드를 실행하는 방법이다.
+    상속 순서역시 가장 뒤에 와도 상관없기 때문에 가장 좋은 방법인것 같다.
+    ex)
+        class MyClass(BaseClass, SingletonInstane):
+          pass
+
+        c = MyClass.instance()
+    """
+    __instance = None
+
+    @classmethod
+    def __getInstance(cls):
+        return cls.__instance
+
+    @classmethod
+    def instance(cls, *args, **kargs):
+        cls.__instance = cls(*args, **kargs)
+        cls.instance = cls.__getInstance
+        return cls.__instance
+
+
 class SingletonType(type):
     _instances = {}
 
