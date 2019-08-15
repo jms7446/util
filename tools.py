@@ -4,6 +4,7 @@ from os.path import join as pjoin
 import pickle
 from contextlib import contextmanager
 from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
+from subprocess import check_output, STDOUT, CalledProcessError
 
 
 def add_file_name_suffix(file_path, suffix):
@@ -25,6 +26,17 @@ def make_parent_dir(path):
     dir_name = os.path.dirname(path)
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
+
+
+def ssh_call(host, cmd, return_output=False):
+    try:
+        output = check_output([f'ssh {host} "{cmd}"'], stderr=STDOUT, shell=True)
+    except CalledProcessError as exc:
+        msg = f'fail to run ssh call, host: {host}, cmd: "{cmd}", erroe message: {exc.output.decode("utf8")}'
+        raise OSError(msg)
+    else:
+        if return_output:
+            print(output.decode("utf8"))
 
 
 def move_file(src_path: str, dst_path: str, overwrite=True):
