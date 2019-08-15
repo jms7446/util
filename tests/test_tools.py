@@ -6,6 +6,16 @@ import pytest
 from .. import tools
 
 
+def test_remote_ssh_command():
+    host = 'host'
+    cmd = 'mv'
+    args = ['my name.txt', 'your name.txt']
+
+    assert tools.make_remote_ssh_command(host, cmd, *args).strip() == """
+        ssh host 'mv "my name.txt" "your name.txt"'
+    """.strip()
+
+
 @pytest.mark.parametrize(['file_path', 'suffix', 'expected'], [
     ('/dir/aa.txt', 'suffix', '/dir/aa_suffix.txt'),
     ('dir/aa.txt', 'suffix', 'dir/aa_suffix.txt'),
