@@ -12,7 +12,18 @@ def test_remote_ssh_command():
     args = ['my name.txt', 'your name.txt']
 
     assert tools.make_remote_ssh_command(host, cmd, *args).strip() == """
-        ssh host 'mv "my name.txt" "your name.txt"'
+        ssh host "mv \"my name.txt\" \"your name.txt\""
+    """.strip()
+
+
+def test_remote_ssh_command_with_quote_in_arg():
+    """arg 안에 sigle quote (') 가 포함된 경우를 처리한다"""
+    host = 'host'
+    cmd = 'mv'
+    args = ["my brother's name.txt", "your name.txt"]
+
+    assert tools.make_remote_ssh_command(host, cmd, *args).strip() == """
+        ssh host "mv \"my brother's name.txt\" \"your name.txt\""
     """.strip()
 
 

@@ -33,16 +33,16 @@ def make_remote_ssh_command(host, cmd, *args):
 
     note: remote call ssh의 파라미터는 (cmd + args)이고, remote 서버에서 실행할 cmd에 대한 파라미터는 args 각각이다.
     이 두가지는 모두 띄어쓰기를 포함할 수 있기 때문에 quote를 사용해서 묶어주어야 한다.
-    1. ssh의 파라미터는 shell에 의한 해석 (*에 대한 해석 같은) 없이 그대로 보내야 하기 때문에 single quote로 묶는다
-    2. cmd의 파라미터들은 romote server shell에서 해석되어 하기 때문에 double quote로 묶는다.
+    1. 파일이름에 <'> 를 사용하는 경우가 있다. args를 '로 묶을 경우 파일 이름에 있는 '을 처리하기 힘들다.
+    2. 따라서 두 가지 종류의 args를 모두 double quote로 묶고, 내부에 있는 double quote는 escaping한다
     ex) host server에서 "my name.txt"를 "your name.txt" 로 이동하는 명령의 경우
-         <ssh host 'mv "my name.txt" "your name.txt"'> 가 되어야 한다."""
+         <ssh host "mv \"my name.txt\" \"your name.txt\"'> 가 되어야 한다."""
 
     def quote_token(token):
-        return '''"%s"''' % token
+        return '''\"%s\"''' % token
 
     quoted_args = ' '.join(quote_token(arg) for arg in args)
-    remote_command = f"ssh {host} '{cmd} {quoted_args}'"
+    remote_command = f'ssh {host} "{cmd} {quoted_args}"'
     return remote_command
 
 
