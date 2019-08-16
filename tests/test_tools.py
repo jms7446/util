@@ -2,29 +2,45 @@ import os
 from os.path import join as pjoin
 from pathlib import Path
 import pytest
+from subprocess import check_call
 
 from .. import tools
 
 
-def test_remote_ssh_command():
+def test_make_sub_shell_command():
     host = 'host'
     cmd = 'mv'
     args = ['my name.txt', 'your name.txt']
-
-    assert tools.make_remote_ssh_command(host, cmd, *args).strip() == """
-        ssh host "mv \"my name.txt\" \"your name.txt\""
+    assert tools.make_sub_shell_command(host, cmd, *args).strip() == """
+        ssh host "mv \\"my name.txt\\" \\"your name.txt\\""
     """.strip()
 
 
-def test_remote_ssh_command_with_quote_in_arg():
+def test_make_sub_shell_command__with_single_quote():
     """arg 안에 sigle quote (') 가 포함된 경우를 처리한다"""
     host = 'host'
     cmd = 'mv'
     args = ["my brother's name.txt", "your name.txt"]
-
-    assert tools.make_remote_ssh_command(host, cmd, *args).strip() == """
-        ssh host "mv \"my brother's name.txt\" \"your name.txt\""
+    assert tools.make_sub_shell_command(host, cmd, *args).strip() == """
+        ssh host "mv \\"my brother's name.txt\\" \\"your name.txt\\""
     """.strip()
+
+
+def test_sub_shell_call(temp_dir):
+    """sh 으로 동작 확인,
+    note: ssh 는 테스트 환경에 ssh-server가 떠 있어야 하는 제약이 있어서 sh에 대해서만 테스트한다"""
+    Path('a.txt').touch()
+    tools.sub_shell_call('mv', 'a.txt', 'b.txt')
+    assert not os.path.exists('a.txt')
+    assert os.path.exists('b.txt')
+
+
+def test_sub_shell_call_with_single_quote(temp_dir):
+    """single quote가 있는 경우 처리 확인"""
+    Path("a's.txt").touch()
+    tools.sub_shell_call('mv', "a's.txt", 'b.txt')
+    assert not os.path.exists("a's.txt")
+    assert os.path.exists('b.txt')
 
 
 @pytest.mark.parametrize(['file_path', 'suffix', 'expected'], [

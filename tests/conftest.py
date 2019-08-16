@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 from datetime import datetime, timedelta
 import tempfile
@@ -27,5 +28,6 @@ def watch():
 @pytest.fixture
 def temp_dir():
     dir_path = tempfile.mkdtemp()
+    os.chdir(dir_path)
     yield dir_path
     shutil.rmtree(dir_path)

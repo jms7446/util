@@ -28,7 +28,7 @@ def make_parent_dir(path):
         os.makedirs(dir_name, exist_ok=True)
 
 
-def make_remote_ssh_command(host, cmd, *args):
+def make_sub_shell_command(host, cmd, *args, ):
     """romote server에서 실행할 ssh 명령을 생성한다
 
     note: remote call ssh의 파라미터는 (cmd + args)이고, remote 서버에서 실행할 cmd에 대한 파라미터는 args 각각이다.
@@ -39,23 +39,25 @@ def make_remote_ssh_command(host, cmd, *args):
          <ssh host "mv \"my name.txt\" \"your name.txt\"'> 가 되어야 한다."""
 
     def quote_token(token):
-        return '''\"%s\"''' % token
+        return '''\\"%s\\"''' % token
 
     quoted_args = ' '.join(quote_token(arg) for arg in args)
-    remote_command = f'ssh {host} "{cmd} {quoted_args}"'
-    return remote_command
+    if host:
+        sub_shell_command = f'ssh {host} "{cmd} {quoted_args}"'
+    else:
+        sub_shell_command = f'sh -c "{cmd} {quoted_args}"'
+    return sub_shell_command
 
 
-def ssh_call(host, cmd, *args, return_output=False):
-    remote_command = make_remote_ssh_command(host, cmd, *args)
+def sub_shell_call(cmd, *args, host=None):
+    remote_command = make_sub_shell_command(host, cmd, *args)
     try:
         output = check_output(remote_command, stderr=STDOUT, shell=True)
     except CalledProcessError as exc:
         msg = f'fail to run ssh call, <{remote_command}>, erroe message: {exc.output.decode("utf8")}'
         raise OSError(msg)
     else:
-        if return_output:
-            print(output.decode("utf8"))
+        return output.decode("utf8")
 
 
 def move_file(src_path: str, dst_path: str, overwrite=True):
