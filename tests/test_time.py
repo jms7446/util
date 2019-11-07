@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from ..time import IntervalLocker, TimeRangeLocker, wait_when_error
+from ..time import IntervalLocker, TimeRangeLocker, wait_when_error, get_past_months
 
 
 def test_locker_wait(watch):
@@ -182,3 +182,10 @@ def test_wait_when_error_as_decorator(watch):
     t = watch.now()
     assert func(0, 2) == 0
     assert (watch.now() - t).seconds == 2
+
+
+def test_get_past_months(watch):
+    watch.now.return_value = datetime(2019, 5, 1, 16, 30, 0, 16162)
+    assert get_past_months(count=2) == ['2019-05', '2019-04']
+    assert get_past_months(count=2, fmt='%Y.%m') == ['2019.05', '2019.04']
+

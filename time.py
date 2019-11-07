@@ -3,6 +3,7 @@ import datetime
 from abc import ABC, abstractmethod
 import contextlib
 import logging
+from dateutil.relativedelta import relativedelta
 
 
 class _Watch:
@@ -126,3 +127,12 @@ class wait_when_error:
                     self.wait_time = max(self.min_wait_time, self.wait_time * self.down_ratio)
             return result
         return wrapper
+
+
+def get_past_months(to=None, count=None, fmt='%Y-%m'):
+    if not to and not count:
+        raise ValueError
+
+    now = watch.now()
+    months = [now - relativedelta(months=i) for i in range(count)]
+    return [dt.strftime(fmt) for dt in months]
