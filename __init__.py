@@ -1,7 +1,7 @@
 from util.result_check import io_mock, mock_io, timeit, timeits, time_complexity, evaluate_via_io
 from util.result_check import ext_binary_to_func, compare_func_result, compare_func_results, lprun, timeit_lp
 from util.prob_generate import generate_probs, merge_to_lines, list_to_string, random_choices
-from util.tools import eprint
+from util.cc_tools import eprint
 
 
 __all__ = [

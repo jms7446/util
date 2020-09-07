@@ -9,7 +9,7 @@ from typing import List, Callable, Iterable
 from deprecation import deprecated
 from line_profiler import LineProfiler
 
-from util.tools import eprint, get_caller_filename
+from util.cc_tools import eprint, get_caller_filename
 from util.prob_generate import list_to_string, merge_to_lines
 
 MAX_LOOP = 10 ** 8
