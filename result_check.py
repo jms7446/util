@@ -186,9 +186,9 @@ def _calc_elapse_times(func, func_args, num_iter=1, time_limit=None) -> List[flo
         func_args = (func_args, )
     total_time = 0
     for _ in range(num_iter):
-        st = time.time()
+        st = time.process_time()
         func(*func_args)
-        elapse_time = time.time() - st
+        elapse_time = time.process_time() - st
         elapse_times.append(elapse_time)
         total_time += elapse_time
         if time_limit and total_time > time_limit:
