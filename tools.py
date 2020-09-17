@@ -10,7 +10,7 @@ from typing import Sequence, Callable, TypeVar, Iterator, Tuple
 U = TypeVar('U')
 
 
-def combination_with_pruning(items: Sequence[U], condition: Callable[[U, U], bool]) -> Iterator[Tuple[U, U]]:
+def combination2_with_pruning(items: Sequence[U], condition: Callable[[U, U], bool]) -> Iterator[Tuple[U, U]]:
     """generate combination(items) with pruning
 
     note.
