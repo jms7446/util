@@ -5,6 +5,27 @@ import pickle
 from contextlib import contextmanager
 from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
 from subprocess import check_output, STDOUT, CalledProcessError
+from typing import Sequence, Callable, TypeVar, Iterator, Tuple
+
+U = TypeVar('U')
+
+
+def combination_with_pruning(items: Sequence[U], condition: Callable[[U, U], bool]) -> Iterator[Tuple[U, U]]:
+    """generate combination(items) with pruning
+
+    note.
+      1. items must be sorted by caller appropriately.
+      2. condition(item1, item1) must have valid meaning.
+    """
+    for i in range(len(items) - 1):
+        item1 = items[i]
+        if not condition(item1, item1):
+            break
+        for j in range(i + 1, len(items)):
+            item2 = items[j]
+            if not condition(item1, item2):
+                break
+            yield item1, item2
 
 
 def add_file_name_suffix(file_path, suffix):
