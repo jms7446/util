@@ -5,9 +5,27 @@ import pickle
 from contextlib import contextmanager
 from urllib.parse import urlsplit, urlunsplit, parse_qs, urljoin
 from subprocess import check_output, STDOUT, CalledProcessError
-from typing import Sequence, Callable, TypeVar, Iterator, Tuple
+from typing import Sequence, Callable, TypeVar, Iterator, Tuple, List
+from collections import deque
 
 U = TypeVar('U')
+
+
+def iter_window_max(xs: List[int], k: int) -> Iterator[int]:
+    queue = deque()
+    for i in range(k):
+        while queue and xs[queue[-1]] <= xs[i]:
+            queue.pop()
+        queue.append(i)
+    yield xs[queue[0]]
+
+    for i in range(k, len(xs)):
+        if queue[0] == i - k:
+            queue.popleft()
+        while queue and xs[queue[-1]] <= xs[i]:
+            queue.pop()
+        queue.append(i)
+        yield xs[queue[0]]
 
 
 def combination2_with_pruning(items: Sequence[U], condition: Callable[[U, U], bool]) -> Iterator[Tuple[U, U]]:

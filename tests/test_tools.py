@@ -7,6 +7,11 @@ from subprocess import check_call
 from .. import tools
 
 
+def test_new():
+    arr = [12, 1, 78, 90, 57, 89, 56]
+    assert list(tools.iter_window_max(arr, 3)) == [78, 90, 90, 90, 89]
+
+
 def test_make_sub_shell_command():
     host = 'host'
     cmd = 'mv'
