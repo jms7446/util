@@ -16,11 +16,6 @@ def main_incorrect():
     return stdin.readline() + ' what?'
 
 
-def test_evaluate_via_stdin():
-    in_str = 'a'
-    assert evaluate_via_io(main_correct, in_str) == 'a processed'
-
-
 def test_compare_func_result():
     def func1(s):
         return s + '1'
