@@ -1,6 +1,12 @@
 from ..data_structure import *
 
 
+def test_KMP():
+    assert KMP('ababaca').table == [0, 0, 1, 2, 3, 0, 1]
+    assert list(KMP('abababc').search('ababababc abababd')) == [2]
+    assert list(KMP('abcdabd').search('abc abcdab abcdabcdabde')) == [15]
+
+
 def test_SegmentTree_add():
     from itertools import combinations
 

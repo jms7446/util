@@ -52,29 +52,27 @@ class KMP:
     @staticmethod
     def make_partial_match_table(ptn):
         table = [0] * len(ptn)
-        cnd = 0
-        for pos in range(1, len(ptn)):
-            while cnd > 0 and ptn[pos] != ptn[cnd]:
-                cnd = table[cnd - 1]
-            if ptn[pos] == ptn[cnd]:
-                cnd += 1
-                table[pos] = cnd
+        j = 0
+        for i in range(1, len(ptn)):
+            while ptn[j] != ptn[i] and j > 0:
+                j = table[j-1]
+            if ptn[j] == ptn[i]:
+                j += 1
+                table[i] = j
         return table
 
-    def search(self, in_str):
+    def search(self, txt):
         ptn = self.ptn
-        table = self.table
-        len_ptn_minus1 = len(ptn) - 1
         j = 0
-        for i, c in enumerate(in_str):
-            while j > 0 and c != ptn[j]:
-                j = table[j-1]
-            if c == ptn[j]:
-                if j == len_ptn_minus1:
-                    yield i - len(ptn) + 1
-                    j = table[j]
-                else:
-                    j += 1
+        for i, c in enumerate(txt):
+            while ptn[j] != c and j > 0:
+                j = self.table[j-1]
+            if ptn[j] == c:
+                j += 1
+                if j == len(ptn):
+                    yield i - j + 1
+                    j = self.table[j - 1]
+
 
 ################################################################################
 
