@@ -29,15 +29,63 @@ class SegmentTree:
                 return self.acc_func(get_value(v * 2 + 1, il, im), get_value(v * 2 + 2, im + 1, ir))
         return get_value(0, 0, self.n - 1)
 
-    def update(self, idx, val):
+    def update(self, idx, diff):
         def _update(v, il, ir):
             if il == idx and ir == idx:
-                self.tree[v] = val
+                self.tree[v] += diff
             elif il <= idx <= ir:
                 im = (il + ir) // 2
                 self.tree[v] = self.acc_func(_update(v * 2 + 1, il, im), _update(v * 2 + 2, im + 1, ir))
             return self.tree[v]
         _update(0, 0, self.n - 1)
+
+
+class SegmentTreeLazy:
+    def __init__(self, xs):
+        def build(v, il, ir):
+            if il == ir:
+                self.tree[v] = xs[il]
+            else:
+                im = (il + ir) // 2
+                self.tree[v] = build(v * 2 + 1, il, im) + build(v * 2 + 2, im + 1, ir)
+            return self.tree[v]
+
+        self.n = len(xs)
+        self.tree = [0] * (self.n * 4)   # rough max
+        self.lazy = [0] * (self.n * 4)   # rough max
+        build(0, 0, self.n - 1)
+
+    def get_range_value(self, left, right):
+        def get_value(v, il, ir, lazy):
+            self.lazy[v] += lazy
+            if il >= left and ir <= right:
+                return self.tree[v] + self.lazy[v] * (ir - il + 1)
+            elif il > right or ir < left:
+                return 0
+            else:
+                im = (il + ir) // 2
+                cur_lazy = self.lazy[v]
+                self.tree[v] += cur_lazy * (ir - il + 1)
+                self.lazy[v] = 0
+                ll = get_value(v * 2 + 1, il, im, cur_lazy)
+                rr = get_value(v * 2 + 2, im + 1, ir, cur_lazy)
+                return ll + rr
+
+        return get_value(0, 0, self.n - 1, 0)
+
+    def range_update(self, left, right, diff):
+        def _update(v, il, ir):
+            if il >= left and ir <= right:
+                self.lazy[v] += diff
+            elif il > right or ir < left:
+                pass
+            else:
+                self.tree[v] += diff * (min(right, ir) - max(left, il) + 1)
+                im = (il + ir) // 2
+                _update(v * 2 + 1, il, im)
+                _update(v * 2 + 2, im + 1, ir)
+
+        return _update(0, 0, self.n - 1)
 
 
 class FenwickTree:
