@@ -40,6 +40,32 @@ class SegmentTree:
         _update(0, 0, self.n - 1)
 
 
+class FenwickTree:
+    def __init__(self, xs):
+        self.tree = [0] * (len(xs) + 1)
+        for i in range(1, len(xs) + 1):
+            self._update(i, xs[i - 1])
+
+    def get_range_value(self, left, right):
+        return self._sum(right + 1) - self._sum(left)
+
+    def update(self, idx, diff):
+        self._update(idx + 1, diff)
+
+    def _sum(self, idx):
+        acc = 0
+        while idx > 0:
+            acc += self.tree[idx]
+            idx &= idx - 1
+        return acc
+
+    def _update(self, idx, diff):
+        tree_size = len(self.tree)
+        while idx < tree_size:
+            self.tree[idx] += diff
+            idx += (idx & -idx)
+
+
 ################################################################################
 # KMP
 ################################################################################

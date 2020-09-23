@@ -1,4 +1,19 @@
+from itertools import combinations
+
 from ..data_structure import *
+
+
+def test_FenwickTree():
+    xs = [2, 3, 7, 4, 5, 9, 6, 1]
+    tree = FenwickTree(xs)
+    for i, j in combinations(range(len(xs)), 2):
+        assert (tree.get_range_value(i, j-1), (i, j)) == (sum(xs[i:j]), (i, j))
+
+    diff = 3
+    xs[3] += diff
+    tree.update(3, 3)
+    for i, j in combinations(range(len(xs)), 2):
+        assert (tree.get_range_value(i, j-1), (i, j)) == (sum(xs[i:j]), (i, j))
 
 
 def test_KMP():
@@ -8,8 +23,6 @@ def test_KMP():
 
 
 def test_SegmentTree_add():
-    from itertools import combinations
-
     xs = [2, 3, 7, 4, 5, 9, 6, 1]
     tree = SegmentTree(xs)
     for i, j in combinations(range(len(xs)), 2):
