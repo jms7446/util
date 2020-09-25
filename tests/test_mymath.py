@@ -1,6 +1,10 @@
 from util.mymath import *
 
 
+def test_catalan():
+    assert [catalan(i) for i in range(10)] == [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862]
+
+
 def test_number_to_digits():
     assert number_to_digits(12) == [1, 2]
     assert number_to_digits(12, base=3) == [1, 1, 0]

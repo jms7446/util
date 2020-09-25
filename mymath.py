@@ -57,6 +57,12 @@ def nCr(n, r):
     return numer // denom
 
 
+def catalan(n):
+    """catalan = (2n)! / ((n + 1)! * n!)"""
+    nfact = math.factorial(n)
+    return math.factorial(2 * n) // nfact // nfact // (n + 1)
+
+
 @lru_cache(10000)
 def permutations_with_dup(counts):
     return math.factorial(sum(counts)) // reduce(mul, (math.factorial(i) for i in counts if i >= 2), 1)
